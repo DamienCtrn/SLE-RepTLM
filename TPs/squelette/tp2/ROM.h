@@ -3,6 +3,7 @@
 
 #include "ensitlm.h"
 
+#define ROM_MAP_START MEM_SIZE
 #define ROM_SIZE (320 * 240 / 2)
 
 struct ROM : public sc_core::sc_module {

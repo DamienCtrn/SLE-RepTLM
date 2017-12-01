@@ -10,6 +10,9 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
+#define LCDC_REG_START 0x00
+#define LCDC_REG_SIZE 0x0C 
+
 struct LCDC : sc_core::sc_module {
 	ensitlm::initiator_socket<LCDC> initiator_socket;
 	ensitlm::target_socket<LCDC> target_socket;

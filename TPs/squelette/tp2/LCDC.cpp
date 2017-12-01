@@ -140,9 +140,6 @@ tlm::tlm_response_status LCDC::read(const ensitlm::addr_t &a,
 	case LCDC_ADDR_REG:
 		d = addr_register;
 		break;
-	case LCDC_START_REG:
-		d = started;
-		break;
 	case LCDC_INT_REG:
 		d = int_register;
 		break;
@@ -163,6 +160,7 @@ tlm::tlm_response_status LCDC::write(const ensitlm::addr_t &a,
 		break;
 	case LCDC_START_REG:
 		started = d;
+		start_event.notify();
 		break;
 	case LCDC_INT_REG:
 		int_register = d;

@@ -8,15 +8,15 @@ int sc_main(int argc, char **argv) {
 	(void)argc;
 	(void)argv;
 	/*
-		GENERATOR -> || -> MEMORY
-					 ||
-					 || -> LCDC (target)
-					 || <- LCDC (initiator)
+		MEMORY <- || <- GENERATOR
+				  ||	  |
+				  || -> LCDC (target)
+				  || <- LCDC (initiator)
 	*/
 
 	generator g("Gérard");
 	Bus b("Bertrand");
-	Memory m("Marco", 0xFC);
+	Memory m("Marco", MEM_SIZE);
 	LCDC l("Leopold", sc_core::sc_time(1.0 / 25, sc_core::SC_SEC));
 
 	/* Address Mapping : (socket, addresse de début, taille) */
@@ -29,6 +29,9 @@ int sc_main(int argc, char **argv) {
 
 	l.initiator_socket.bind(b.target);
 	b.initiator.bind(m.target);
+
+	/* connect the interrupt port */
+	l.display_int.bind(g.irq_signal);
 
 	/* and start simulation */
 	sc_core::sc_start();

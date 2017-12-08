@@ -7,6 +7,8 @@
 #define MEM_ADDR_START 0x2800
 #define MEM_ADDR_SIZE 0x12C00
 #define IMG_SIZE 76800
+#define ROW_SIZE 320
+#define COL_SIZE 240
 
 SC_MODULE(Memory) {
 	ensitlm::target_socket<Memory> target;

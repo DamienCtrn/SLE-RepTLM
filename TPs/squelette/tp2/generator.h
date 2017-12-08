@@ -9,7 +9,7 @@ struct generator : sc_core::sc_module {
 	sc_signal<bool, SC_MANY_WRITERS> irq_signal;
 	sc_event irq_interrupt;
 	void thread(void);
-	void store_image_in_memory(ensitlm::addr_t addr_mem);
+	void store_image_in_memory(int offset);
 	void irq_handler(void);
 	void refresh(void);
 	SC_CTOR(generator);

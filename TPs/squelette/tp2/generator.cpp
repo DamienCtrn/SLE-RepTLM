@@ -2,13 +2,21 @@
 #include "memory.h"
 #include "LCDC_registermap.h"
 #include "ROM.h"
+#include <unistd.h>
 
 using namespace std;
 
+/**
+ * Thread d'execution principal
+ * Initialise l'écran et la mémoire
+ * puis affiche l'image présent en ROM décalée d'un pixel vers le bas
+ * retardée les 10 ms pour plus de visibilité
+ */
 void generator::thread(void) {
+	unsigned int usec = 10000;
 
 	/* Filling memory with ROM */
-	store_image_in_memory(MEM_ADDR_START);
+	store_image_in_memory(0x0);
 
 	/* Initiating the Screen */
 	ensitlm::data_t val = MEM_ADDR_START;
@@ -18,22 +26,31 @@ void generator::thread(void) {
 	addr = LCDC_START_REG;
 	initiator.write(addr, val);
 
-	ensitlm::addr_t i = 0xF0;
+	int offset = ROW_SIZE;
 	while (1) {
 		/* Waiting for interrupt */
 		wait(irq_interrupt);
-		store_image_in_memory(MEM_ADDR_START + i);
-		i += 0xF0;
-		i %= (MEM_ADDR_START + MEM_ADDR_SIZE);
+
+		store_image_in_memory(offset);
+		offset += ROW_SIZE;
+		offset %= IMG_SIZE;
+
+		usleep(usec);
 		refresh();
 	}
 }
 
-void generator::store_image_in_memory(ensitlm::addr_t addr_mem) {
+/**
+ * Enregistre une image présente en ROM dans la mémoire avec un offset
+ * Si l'image dépasse de la zone de mémoire,
+ * les pixels sont enregistrés au début de la zone
+ */
+void generator::store_image_in_memory(int offset) {
 	ensitlm::data_t val_rom;
 	ensitlm::data_t val_mem1 = 0x0;
 	ensitlm::data_t val_mem2 = 0x0;
 	ensitlm::addr_t addr_rom = ROM_MAP_START;
+	ensitlm::addr_t addr_mem = MEM_ADDR_START + offset;
 	while (addr_rom < ROM_MAP_START + ROM_SIZE) {
 		initiator.read(addr_rom, val_rom);
 		val_mem1 =  (val_rom & 0xF0000000)
@@ -44,25 +61,32 @@ void generator::store_image_in_memory(ensitlm::addr_t addr_mem) {
 				 + ((val_rom & 0x00000F00) << 12)
 				 + ((val_rom & 0x000000F0) << 8)
 				 + ((val_rom & 0x0000000F) << 4);
+		if (addr_mem >= MEM_ADDR_START + MEM_ADDR_SIZE) {
+			addr_mem = MEM_ADDR_START;
+		}
 		initiator.write(addr_mem, val_mem1);
 		addr_mem += 4;
 		if (addr_mem >= MEM_ADDR_START + MEM_ADDR_SIZE) {
-			addr_mem -= MEM_ADDR_SIZE;
+			addr_mem = MEM_ADDR_START;
 		}
 		initiator.write(addr_mem, val_mem2);
 		addr_mem += 4;
-		if (addr_mem >= MEM_ADDR_START + MEM_ADDR_SIZE) {
-			addr_mem -= MEM_ADDR_SIZE;
-		}
 		addr_rom += 4;
 	}
 }
 
-void generator::irq_handler(void){
+/**
+ * Notifie le handler sur changement du signal irq envoyé par le LCDC
+ */
+void generator::irq_handler(void) {
 	irq_interrupt.notify();
 }
 
-void generator::refresh(void){
+/**
+ * Ecrit dans le registre d'interrupt du LCDC
+ * pour notifier qu'il peut refresh son buffer
+ */
+void generator::refresh(void) {
 	ensitlm::addr_t addr = LCDC_INT_REG;
 	initiator.write(addr, 0x0);
 }

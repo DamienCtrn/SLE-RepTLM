@@ -1,8 +1,9 @@
 CC=gcc
+CSOURCE=$(wildcard ./../*.c)
 INCLUDE=-I. -I../../
 CFLAGS=$(INCLUDE)
 
-main.o: hal.h
+main.o: $(CSOURCE) hal.h
 	$(CC) $(CFLAGS) $^ -o $@
 
 .PHONY: clean realclean

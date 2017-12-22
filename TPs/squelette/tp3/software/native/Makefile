@@ -4,7 +4,7 @@ INCLUDE=-I. -I../../
 CFLAGS=$(INCLUDE)
 
 main.o: $(CSOURCE) hal.h
-	$(CC) $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $< -o $@ -c
 
 .PHONY: clean realclean
 clean:

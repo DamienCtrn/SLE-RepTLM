@@ -52,13 +52,11 @@ NativeWrapper::NativeWrapper(sc_core::sc_module_name name) : sc_module(name),
 
 void NativeWrapper::hal_write32(unsigned int addr, unsigned int data)
 {
-	// std::cout << "hal_write32 called" << std::endl;
 	socket.write(addr, data);
 }
 
 unsigned int NativeWrapper::hal_read32(unsigned int addr)
 {
-	// std::cout << "hal_read32 called" << std::endl;
 	unsigned int value;
 	socket.read(addr, value);
 	return value;
@@ -66,25 +64,21 @@ unsigned int NativeWrapper::hal_read32(unsigned int addr)
 
 void NativeWrapper::hal_cpu_relax()
 {
-	// std::cout << "hal_cpu_relax called" << std::endl;
 	wait(1, sc_core::SC_SEC);
 }
 
 void NativeWrapper::hal_wait_for_irq()
 {
-	// std::cout << "hal_wait_for_irq called" << std::endl;
 	wait(interrupt_event);
 }
 
 void NativeWrapper::compute()
 {
-	std::cout << "compute called" << std::endl;
 	main();
 }
 
 void NativeWrapper::interrupt_handler_internal()
 {
-	// std::cout << "interrupt_handler_internal called" << std::endl;
 	interrupt_event.notify();
 	interrupt_handler();
 }

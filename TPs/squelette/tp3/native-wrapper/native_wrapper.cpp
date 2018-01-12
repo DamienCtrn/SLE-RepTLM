@@ -44,36 +44,46 @@ NativeWrapper::NativeWrapper(sc_core::sc_module_name name) : sc_module(name),
 							     irq("irq")
 {
 	std::cout << "building cpu..." << std::endl;
+	SC_THREAD(compute);
+	SC_METHOD(interrupt_handler_internal)
+	sensitive << irq;
 	std::cout << "building cpu done." << std::endl;
 }
 
 void NativeWrapper::hal_write32(unsigned int addr, unsigned int data)
 {
-	std::cout << "hal_write32 called." << std::endl;
-	abort(); // TODO
+	// std::cout << "hal_write32 called" << std::endl;
+	socket.write(addr, data);
 }
 
 unsigned int NativeWrapper::hal_read32(unsigned int addr)
 {
-	abort(); // TODO
+	// std::cout << "hal_read32 called" << std::endl;
+	unsigned int value;
+	socket.read(addr, value);
+	return value;
 }
 
 void NativeWrapper::hal_cpu_relax()
 {
-	abort(); // TODO
+	// std::cout << "hal_cpu_relax called" << std::endl;
+	wait(1, sc_core::SC_SEC);
 }
 
 void NativeWrapper::hal_wait_for_irq()
 {
-	abort(); // TODO
+	// std::cout << "hal_wait_for_irq called" << std::endl;
+	wait(interrupt_event);
 }
 
 void NativeWrapper::compute()
 {
-	abort(); // TODO
+	std::cout << "compute called" << std::endl;
+	main();
 }
 
 void NativeWrapper::interrupt_handler_internal()
 {
-	abort(); // TODO
+	// std::cout << "interrupt_handler_internal called" << std::endl;
+	interrupt_event.notify();
 }

@@ -86,4 +86,5 @@ void NativeWrapper::interrupt_handler_internal()
 {
 	// std::cout << "interrupt_handler_internal called" << std::endl;
 	interrupt_event.notify();
+	interrupt_handler();
 }

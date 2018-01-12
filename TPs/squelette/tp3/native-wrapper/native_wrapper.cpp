@@ -18,15 +18,15 @@ extern "C" void hal_write32(uint32_t addr, uint32_t data) {
 }
 
 extern "C" unsigned int hal_read32(uint32_t addr) {
-	abort();
+	return NativeWrapper::get_instance()->hal_read32(addr);
 }
 
 extern "C" void hal_cpu_relax() {
-	abort();
+	NativeWrapper::get_instance()->hal_cpu_relax();
 }
 
 extern "C" void hal_wait_for_irq() {
-	abort();
+	NativeWrapper::get_instance()->hal_wait_for_irq();
 }
 
 /* To keep it simple, the soft wrapper is a singleton, we can

@@ -48,6 +48,7 @@ NativeWrapper::NativeWrapper(sc_core::sc_module_name name) : sc_module(name),
 	SC_METHOD(interrupt_handler_internal)
 	sensitive << irq;
 	std::cout << "building cpu done." << std::endl;
+	
 }
 
 void NativeWrapper::hal_write32(unsigned int addr, unsigned int data)

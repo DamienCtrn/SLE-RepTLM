@@ -26,7 +26,7 @@ sections.txt: $(EXEC)
 
 
 $(EXEC): $(OBJS) # TODO: dependencies
-	$(TARGET_LD) -T #echo "Rule for linking not implemented."; exit 1
+	$(TARGET_LD) -T ldscript #echo "Rule for linking not implemented."; exit 1
 # TODO: use $(TARGET_LD), and use the -T option to point to linker script ldscript
 
 main.o: ../main.c hal.h # TODO: dependencies
@@ -34,7 +34,7 @@ main.o: ../main.c hal.h # TODO: dependencies
 # TODO: compile with target C compiler
 
 %.o: %.s
-	echo "Rule for assembly not implemented"; exit 1
+	$(TARGET_CC) $< -o $@ -c #echo "Rule for assembly not implemented"; exit 1
 
 .PHONY: clean realclean
 clean:

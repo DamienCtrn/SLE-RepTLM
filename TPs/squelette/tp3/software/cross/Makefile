@@ -29,7 +29,7 @@ $(EXEC): $(OBJS) # TODO: dependencies
 	$(TARGET_LD) -T ldscript $^
 # TODO: use $(TARGET_LD), and use the -T option to point to linker script ldscript
 
-main.o: ../main.c hal.h # TODO: dependencies
+main.o: ../main.c hal.h ../../address_map.h # TODO: dependencies
 	$(TARGET_CC) $(INCLUDE) $< -o $@ -c
 # TODO: compile with target C compiler
 

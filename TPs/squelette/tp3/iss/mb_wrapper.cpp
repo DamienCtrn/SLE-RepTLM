@@ -12,8 +12,8 @@
 /* Time between two step()s */
 static const sc_core::sc_time PERIOD(20, sc_core::SC_NS);
 
-//#define DEBUG
-//#define INFO
+#define DEBUG
+// #define INFO
 
 using namespace std;
 
@@ -38,7 +38,8 @@ void MBWrapper::exec_data_request(enum iss_t::DataAccessType mem_type,
 	case iss_t::READ_WORD: {
 		/* The ISS requested a data read
 		   (mem_addr into localbuf). */
-		abort(); // TODO
+		socket.read(mem_addr, localbuf);
+		// abort(); // TODO
 #ifdef DEBUG
 		std::cout << hex << "read    " << setw(10) << localbuf
 		          << " at address " << mem_addr << std::endl;
@@ -57,9 +58,8 @@ void MBWrapper::exec_data_request(enum iss_t::DataAccessType mem_type,
 		// No cache => nothing to do.
 		break;
 	case iss_t::WRITE_WORD: {
-		/* The ISS requested a data write
-		   (mem_wdata at mem_addr). */
-		abort(); // TODO
+		socket.write(mem_addr, mem_wdata);
+		// abort(); // TODO
 #ifdef DEBUG
 		std::cout << hex << "wrote   " << setw(10) << mem_wdata
 		          << " at address " << mem_addr << std::endl;
@@ -89,8 +89,9 @@ void MBWrapper::run_iss(void) {
 				/* The ISS requested an instruction.
 				 * We have to do the instruction fetch
 				 * by reading from memory. */
-				abort(); // TODO
+				// abort(); // TODO
 				uint32_t localbuf;
+				socket.read(ins_addr, localbuf);
 				m_iss.setInstruction(0, localbuf);
 			}
 
@@ -106,7 +107,7 @@ void MBWrapper::run_iss(void) {
 				                  mem_wdata);
 			}
 			m_iss.step();
-                        /* IRQ handling to be done */
+                        /* IRQ handling to be done (TODO) */
 		}
 
 		wait(PERIOD);

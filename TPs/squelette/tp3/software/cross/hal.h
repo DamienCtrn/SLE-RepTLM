@@ -15,17 +15,17 @@
 
 #include <stdint.h>
 
-#define abort() _hw_exception_handler();
+//#define abort() _hw_exception_handler();
 
 /* Dummy implementation of abort(): invalid instruction */
-/* #define abort() do {				\ */
-/* 	printf("abort() function called\r\n");  \ */
-/* 	_hw_exception_handler();		\ */
-/* } while (0) */
+#define abort() do {				\
+	printf("abort() function called\r\n");  \
+	_hw_exception_handler();		\
+} while (0)
 
 /* TODO: implement HAL primitives for cross-compilation */
-#define hal_read32(a)      abort()
-#define hal_write32(a, d)  abort()
+#define hal_read32(a)      *(volatile uint32_t *)(a);
+#define hal_write32(a, d)  *(volatile uint32_t *)(a) = (d);
 #define hal_wait_for_irq() abort()
 #define hal_cpu_relax()    abort()
 

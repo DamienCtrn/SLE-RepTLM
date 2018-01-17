@@ -38,13 +38,14 @@ void MBWrapper::exec_data_request(enum iss_t::DataAccessType mem_type,
 	case iss_t::READ_WORD: {
 		/* The ISS requested a data read
 		   (mem_addr into localbuf). */
-		socket.read(mem_addr, localbuf);
+
 		// abort(); // TODO
 #ifdef DEBUG
 		std::cout << hex << "read    " << setw(10) << localbuf
 		          << " at address " << mem_addr << std::endl;
 #endif
-		m_iss.setDataResponse(0, localbuf);
+		socket.read(uint32_be_to_machine(mem_addr), localbuf);
+		m_iss.setDataResponse(0, uint32_be_to_machine(localbuf));
 	} break;
 	case iss_t::READ_BYTE:
 	case iss_t::WRITE_HALF:
@@ -58,12 +59,12 @@ void MBWrapper::exec_data_request(enum iss_t::DataAccessType mem_type,
 		// No cache => nothing to do.
 		break;
 	case iss_t::WRITE_WORD: {
-		socket.write(mem_addr, mem_wdata);
 		// abort(); // TODO
 #ifdef DEBUG
 		std::cout << hex << "wrote   " << setw(10) << mem_wdata
 		          << " at address " << mem_addr << std::endl;
 #endif
+		socket.write(uint32_be_to_machine(mem_addr), uint32_be_to_machine(mem_wdata));
 		m_iss.setDataResponse(0, 0);
 	} break;
 	case iss_t::STORE_COND:
@@ -91,8 +92,12 @@ void MBWrapper::run_iss(void) {
 				 * by reading from memory. */
 				// abort(); // TODO
 				uint32_t localbuf;
+#ifdef DEBUG
+		std::cout << hex << "read   " << setw(10) << localbuf
+		          << " at address " << ins_addr << std::endl;
+#endif
 				socket.read(ins_addr, localbuf);
-				m_iss.setInstruction(0, localbuf);
+				m_iss.setInstruction(true, uint32_be_to_machine(localbuf));
 			}
 
 			bool mem_asked;

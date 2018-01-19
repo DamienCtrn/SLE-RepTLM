@@ -27,7 +27,9 @@
 /* TODO: implement HAL primitives for cross-compilation */
 #define hal_read32(a)      *(volatile unsigned int *)(a);
 #define hal_write32(a, d)  *(volatile unsigned int *)(a) = (d);
-#define hal_wait_for_irq() do {} while(0)
+#define hal_wait_for_irq() do { cout << "waiting for irq..." << endl;	\
+		while(irq_received != 1){}			     \
+	} while(0); 
 #define hal_cpu_relax()    do {} while(0)
 
 void microblaze_enable_interrupts(void) {

@@ -24,14 +24,22 @@ MBWrapper::MBWrapper(sc_core::sc_module_name name)
 	m_iss.reset();
 	m_iss.setIrq(false);
 	SC_THREAD(run_iss);
+	SC_METHOD(interrupt_handler);
+	sensitive << irq;
         /* The method that is needed to forward the interrupts from the SystemC
          * environment to the ISS need to be declared here */
 }
 
 /* IRQ forwarding method to be defined here */
+void MBWrapper::interrupt_handler() {
+	m_iss.setIrq(true);
+}
 
 void MBWrapper::exec_data_request(enum iss_t::DataAccessType mem_type,
                                   uint32_t mem_addr, uint32_t mem_wdata) {
+#ifdef DEBUG
+	//cout << "exec data request called " << endl;
+#endif
 	uint32_t localbuf;
 	tlm::tlm_response_status status;
 	switch (mem_type) {
@@ -64,7 +72,7 @@ void MBWrapper::exec_data_request(enum iss_t::DataAccessType mem_type,
 		std::cout << hex << "wrote   " << setw(10) << mem_wdata
 		          << " at address " << mem_addr << std::endl;
 #endif
-		socket.write(uint32_be_to_machine(mem_addr), uint32_be_to_machine(mem_wdata));
+		socket.write(mem_addr, uint32_be_to_machine(mem_wdata));
 		m_iss.setDataResponse(0, 0);
 	} break;
 	case iss_t::STORE_COND:
@@ -92,12 +100,13 @@ void MBWrapper::run_iss(void) {
 				 * by reading from memory. */
 				// abort(); // TODO
 				uint32_t localbuf;
+				socket.read(ins_addr, localbuf);
+				m_iss.setInstruction(false, uint32_be_to_machine(localbuf));
 #ifdef DEBUG
-		std::cout << hex << "read   " << setw(10) << localbuf
+		std::cout << hex << "read    " << setw(10) << localbuf
 		          << " at address " << ins_addr << std::endl;
 #endif
-				socket.read(ins_addr, localbuf);
-				m_iss.setInstruction(true, uint32_be_to_machine(localbuf));
+
 			}
 
 			bool mem_asked;

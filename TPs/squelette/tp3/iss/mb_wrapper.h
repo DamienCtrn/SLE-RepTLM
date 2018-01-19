@@ -19,6 +19,7 @@ struct MBWrapper : sc_core::sc_module {
 
 	void run_iss(void);
         /* Add stuff relative to irq handling */
+	void interrupt_handler(void);
 
 	SC_CTOR(MBWrapper);
 

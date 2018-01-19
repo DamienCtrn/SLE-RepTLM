@@ -12,8 +12,9 @@
 /* Time between two step()s */
 static const sc_core::sc_time PERIOD(20, sc_core::SC_NS);
 
-#define DEBUG
+// #define DEBUG
 // #define INFO
+#define STEPS_BETWEEN_IRQ 5
 
 using namespace std;
 
@@ -26,11 +27,8 @@ MBWrapper::MBWrapper(sc_core::sc_module_name name)
 	SC_THREAD(run_iss);
 	SC_METHOD(interrupt_handler);
 	sensitive << irq;
-        /* The method that is needed to forward the interrupts from the SystemC
-         * environment to the ISS need to be declared here */
 }
 
-/* IRQ forwarding method to be defined here */
 void MBWrapper::interrupt_handler() {
 	m_iss.setIrq(true);
 }
@@ -38,22 +36,18 @@ void MBWrapper::interrupt_handler() {
 void MBWrapper::exec_data_request(enum iss_t::DataAccessType mem_type,
                                   uint32_t mem_addr, uint32_t mem_wdata) {
 #ifdef DEBUG
-	//cout << "exec data request called " << endl;
+	cout << "exec data request called " << endl;
 #endif
 	uint32_t localbuf;
 	tlm::tlm_response_status status;
 	switch (mem_type) {
 	case iss_t::READ_WORD: {
-		/* The ISS requested a data read
-		   (mem_addr into localbuf). */
-
-		// abort(); // TODO
 #ifdef DEBUG
 		std::cout << hex << "read    " << setw(10) << localbuf
 		          << " at address " << mem_addr << std::endl;
 #endif
-		socket.read(uint32_be_to_machine(mem_addr), localbuf);
-		m_iss.setDataResponse(0, uint32_be_to_machine(localbuf));
+		socket.read(mem_addr, localbuf);
+		m_iss.setDataResponse(false, uint32_be_to_machine(localbuf));
 	} break;
 	case iss_t::READ_BYTE:
 	case iss_t::WRITE_HALF:
@@ -95,10 +89,6 @@ void MBWrapper::run_iss(void) {
 			m_iss.getInstructionRequest(ins_asked, ins_addr);
 
 			if (ins_asked) {
-				/* The ISS requested an instruction.
-				 * We have to do the instruction fetch
-				 * by reading from memory. */
-				// abort(); // TODO
 				uint32_t localbuf;
 				socket.read(ins_addr, localbuf);
 				m_iss.setInstruction(false, uint32_be_to_machine(localbuf));
@@ -121,7 +111,11 @@ void MBWrapper::run_iss(void) {
 				                  mem_wdata);
 			}
 			m_iss.step();
-                        /* IRQ handling to be done (TODO) */
+        	inst_count++;
+			if (inst_count > STEPS_BETWEEN_IRQ) {
+				inst_count = 0;
+				m_iss.setIrq(false);
+			}
 		}
 
 		wait(PERIOD);

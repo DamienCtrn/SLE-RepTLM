@@ -12,8 +12,8 @@
 /* Time between two step()s */
 static const sc_core::sc_time PERIOD(20, sc_core::SC_NS);
 
-// #define DEBUG
-// #define INFO
+//#define DEBUG
+//#define INFO
 #define STEPS_BETWEEN_IRQ 5
 
 using namespace std;
@@ -111,7 +111,7 @@ void MBWrapper::run_iss(void) {
 				                  mem_wdata);
 			}
 			m_iss.step();
-        	inst_count++;
+			inst_count++;
 			if (inst_count > STEPS_BETWEEN_IRQ) {
 				inst_count = 0;
 				m_iss.setIrq(false);

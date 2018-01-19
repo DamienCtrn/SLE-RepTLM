@@ -13,6 +13,8 @@
 #ifndef HAL_H
 #define HAL_H
 
+#define UADDR UART_BASEADDR + UART_FIFO_WRITE
+
 #include <stdint.h>
 
 // #define abort() _hw_exception_handler();
@@ -35,7 +37,12 @@ void microblaze_enable_interrupts(void) {
 	      "mts     rmsr, r3");
 }
 
-/* TODO: printf is disabled, for now ... */
-#define printf(...) do {} while(0)
+#define printf(str) 						\
+	do {									\
+		int i;								\
+		for (i = 0; str[i] = '\0'; i++) {	\
+			hal_write32(UADDR, *str);		\
+		}									\
+	} while(0);
 
 #endif /* HAL_H */

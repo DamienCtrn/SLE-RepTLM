@@ -14,7 +14,7 @@ extern "C" int main();
 extern "C" void interrupt_handler();
 
 extern "C" void hal_write32(uint32_t addr, uint32_t data) {
-	NativeWrapper::get_instance()->hal_write32(addr,data);
+	NativeWrapper::get_instance()->hal_write32(addr, data);
 }
 
 extern "C" unsigned int hal_read32(uint32_t addr) {
@@ -48,7 +48,7 @@ NativeWrapper::NativeWrapper(sc_core::sc_module_name name) : sc_module(name),
 	SC_METHOD(interrupt_handler_internal)
 	sensitive << irq;
 	std::cout << "building cpu done." << std::endl;
-	
+
 }
 
 void NativeWrapper::hal_write32(unsigned int addr, unsigned int data)

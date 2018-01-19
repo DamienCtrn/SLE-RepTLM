@@ -13,11 +13,9 @@
 #ifndef HAL_H
 #define HAL_H
 
-#define UADDR UART_BASEADDR + UART_FIFO_WRITE
+#define UART_ADDR_WRITE UART_BASEADDR + UART_FIFO_WRITE
 
 #include <stdint.h>
-
-// #define abort() _hw_exception_handler();
 
 // Dummy implementation of abort(): invalid instruction
 #define abort() ({								\
@@ -26,7 +24,6 @@
  		_hw_exception_handler();				\
 	} while (0);								})
 
-/* TODO: implement HAL primitives for cross-compilation */
 #define hal_read32(a)      *(volatile unsigned int *)(a);
 #define hal_write32(a, d)  *(volatile unsigned int *)(a) = (d);
 #define hal_wait_for_irq() do {} while(0)
@@ -37,12 +34,13 @@ void microblaze_enable_interrupts(void) {
 	      "mts     rmsr, r3");
 }
 
-#define printf(str) 						\
-	do {									\
-		int i;								\
-		for (i = 0; str[i] = '\0'; i++) {	\
-			hal_write32(UADDR, *str);		\
-		}									\
+#define printf(string)									\
+	do {												\
+		int i = 0;										\
+		while(string[i] != '\0') {						\
+			hal_write32(UART_ADDR_WRITE, string[i]);	\
+			i++;										\
+		}												\
 	} while(0);
 
 #endif /* HAL_H */

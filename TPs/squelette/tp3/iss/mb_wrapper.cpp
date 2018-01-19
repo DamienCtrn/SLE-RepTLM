@@ -12,8 +12,8 @@
 /* Time between two step()s */
 static const sc_core::sc_time PERIOD(20, sc_core::SC_NS);
 
-//#define DEBUG
-//#define INFO
+// #define DEBUG
+// #define INFO
 #define STEPS_BETWEEN_IRQ 5
 
 using namespace std;
@@ -35,21 +35,29 @@ void MBWrapper::interrupt_handler() {
 
 void MBWrapper::exec_data_request(enum iss_t::DataAccessType mem_type,
                                   uint32_t mem_addr, uint32_t mem_wdata) {
-#ifdef DEBUG
-	cout << "exec data request called " << endl;
-#endif
 	uint32_t localbuf;
 	tlm::tlm_response_status status;
 	switch (mem_type) {
 	case iss_t::READ_WORD: {
 #ifdef DEBUG
-		std::cout << hex << "read    " << setw(10) << localbuf
+		std::cout << hex << "read word " << setw(10) << localbuf
 		          << " at address " << mem_addr << std::endl;
 #endif
 		socket.read(mem_addr, localbuf);
 		m_iss.setDataResponse(false, uint32_be_to_machine(localbuf));
 	} break;
-	case iss_t::READ_BYTE:
+	case iss_t::READ_BYTE: {
+		uint32_t modulus = mem_addr % 4;
+		uint32_t addr_aligned = mem_addr - modulus;
+		socket.read(addr_aligned, localbuf);
+		localbuf = uint32_be_to_machine(localbuf);
+		localbuf = ((localbuf) >> (modulus * 8)) & 0xFF;
+		m_iss.setDataResponse(false, localbuf);
+#ifdef DEBUG
+		std::cout << hex << "read byte " << setw(10) << localbuf
+				  << " at address " << addr_aligned << std::endl;
+#endif
+	} break;
 	case iss_t::WRITE_HALF:
 	case iss_t::WRITE_BYTE:
 	case iss_t::READ_HALF:
@@ -61,7 +69,6 @@ void MBWrapper::exec_data_request(enum iss_t::DataAccessType mem_type,
 		// No cache => nothing to do.
 		break;
 	case iss_t::WRITE_WORD: {
-		// abort(); // TODO
 #ifdef DEBUG
 		std::cout << hex << "wrote   " << setw(10) << mem_wdata
 		          << " at address " << mem_addr << std::endl;
@@ -111,6 +118,7 @@ void MBWrapper::run_iss(void) {
 				                  mem_wdata);
 			}
 			m_iss.step();
+			// Aquittement de l'interruption
 			inst_count++;
 			if (inst_count > STEPS_BETWEEN_IRQ) {
 				inst_count = 0;

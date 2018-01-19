@@ -239,6 +239,7 @@ int main() {
 			if (TEST_BIT(d, GPIO_BTN0)) {
 				break;
 			}
+			// Relax pour la simulation native
 			hal_cpu_relax();
 		}
 	}

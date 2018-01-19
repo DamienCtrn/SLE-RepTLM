@@ -31,8 +31,7 @@ int sc_main(int, char **) {
 	Vga vga("vga");
 	Intc intc("intc");
 	Gpio gpio("gpio");
-
-	UART uart("uart");	// instanciation de l'uart (sans déconner !?)
+	UART uart("uart");
 
 	sc_core::sc_signal<bool> timer_irq("timer_irq");
 	sc_core::sc_signal<bool> vga_irq("vga_irq");
